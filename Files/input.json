@@ -47,5 +47,21 @@
     "Level": 2,
     "HP": 8,
     "Treasure": null
+  },
+  {
+    "$type": "Vampire",
+    "Name": "Ernest Vampire",
+    "Type": "Vampire",
+    "Level": 3,
+    "HP": 10,
+    "Treasure": "dagger"
+  },
+  {
+    "$type": "Ghoul",
+    "Name": "Jasper Ghoul",
+    "Type": "Ghoul",
+    "Level": 3,
+    "HP": 10,
+    "Treasure": "shovel"
   }
 ]

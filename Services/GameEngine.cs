@@ -15,6 +15,8 @@ public class GameEngine
     private readonly IRoomFactory _roomFactory;
     private ICharacter _player;
     private ICharacter _goblin;
+    private ICharacter _vampire;
+    private ICharacter _ghoul;
 
     private List<IRoom> _rooms;
 
@@ -41,10 +43,41 @@ public class GameEngine
         // TODO e.g. "Which monster would you like to attack?"
         // TODO Right now it just attacks the first monster in the room.
         // TODO It is ok to leave this functionality if there is only one monster in the room.
-        var target = _player.CurrentRoom.Characters.FirstOrDefault(c => c != _player);
-        if (target != null)
+        var CurrentRoomCharacters = _player.CurrentRoom.Characters;
+        var target = CurrentRoomCharacters.FirstOrDefault(c => c != _player);
+
+        if (CurrentRoomCharacters.Count > 0)
         {
-            _player.Attack(target);
+            // 1 target
+            if (CurrentRoomCharacters.Count == 1)
+            {
+                _player.Attack(target);
+                CurrentRoomCharacters.Remove(target);
+            }
+            // >1 target
+            else
+            {
+                int charListCount = 1;
+
+                foreach (ICharacter character in CurrentRoomCharacters)
+                {
+                    _outputManager.WriteLine($"{charListCount}:\t{character.Name}");
+                    charListCount +=1;
+                }
+
+                _outputManager.WriteLine("Which monster would you like to attack?");
+
+                _outputManager.Display();
+
+                int monsterIndex = Convert.ToInt16(Console.ReadLine()) - 1;
+
+                target = CurrentRoomCharacters[monsterIndex];
+
+                _outputManager.WriteLine($"You chose to attack {target.Name}");
+
+                _player.Attack(target);
+                CurrentRoomCharacters.Remove(target);
+            }
         }
         else
         {
@@ -78,16 +111,16 @@ public class GameEngine
             string? direction = null;
             switch (input)
             {
-                case "1":
+                case "n":
                     direction = "north";
                     break;
-                case "2":
+                case "s":
                     direction = "south";
                     break;
-                case "3":
+                case "e":
                     direction = "east";
                     break;
-                case "4":
+                case "w":
                     direction = "west";
                     break;
                 case "5":
@@ -130,6 +163,11 @@ public class GameEngine
         randomRoom.AddCharacter(_goblin); // Use helper method
 
         // TODO Load your two new monsters here into the same room
+        randomRoom = _rooms[random.Next(_rooms.Count)];
+        _vampire = _context.Characters.OfType<Vampire>().FirstOrDefault();
+        randomRoom.AddCharacter(_vampire);
+        _ghoul = _context.Characters.OfType<Ghoul>().FirstOrDefault();
+        randomRoom.AddCharacter(_ghoul);
     }
 
     private void SetupGame()
@@ -159,10 +197,17 @@ public class GameEngine
         var library = _roomFactory.CreateRoom("library", _outputManager);
         var armory = _roomFactory.CreateRoom("armory", _outputManager);
         var garden = _roomFactory.CreateRoom("garden", _outputManager);
+        var parlor = _roomFactory.CreateRoom("parlor",_outputManager);
+        var dining = _roomFactory.CreateRoom("dining", _outputManager);
 
         entrance.North = treasureRoom;
         entrance.West = library;
         entrance.East = garden;
+        entrance.South = parlor;
+
+        parlor.North = entrance;
+        parlor.South = dining;
+        dining.North = parlor;
 
         treasureRoom.South = entrance;
         treasureRoom.West = dungeonRoom;
@@ -177,7 +222,7 @@ public class GameEngine
         garden.West = entrance;
 
         // Store rooms in a list for later use
-        _rooms = new List<IRoom> { entrance, treasureRoom, dungeonRoom, library, armory, garden };
+        _rooms = new List<IRoom> { entrance, treasureRoom, dungeonRoom, library, armory, garden, parlor, dining};
 
         return entrance;
     }
