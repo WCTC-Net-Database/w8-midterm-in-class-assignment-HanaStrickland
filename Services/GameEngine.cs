@@ -111,16 +111,16 @@ public class GameEngine
             string? direction = null;
             switch (input)
             {
-                case "n":
+                case "1":
                     direction = "north";
                     break;
-                case "s":
+                case "2":
                     direction = "south";
                     break;
-                case "e":
+                case "3":
                     direction = "east";
                     break;
-                case "w":
+                case "4":
                     direction = "west";
                     break;
                 case "5":
